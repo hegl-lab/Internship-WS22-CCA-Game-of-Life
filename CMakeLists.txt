@@ -40,6 +40,9 @@ target_link_libraries(larger_than_life glfw ${GL_LIBRARY} m glad glfw-abstractio
 add_executable(continuous_states src/game_of_life_continuous_states/main.cpp)
 target_link_libraries(continuous_states glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
+add_executable(continuous_space src/game_of_life_continuous_space/main.cpp)
+target_link_libraries(continuous_space glfw ${GL_LIBRARY} m glad glfw-abstraction)
+
 add_custom_target(copy-shaders ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
         DEPENDS ${MY_TARGET})
