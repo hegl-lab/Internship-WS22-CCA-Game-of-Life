@@ -128,3 +128,7 @@ void SimpleShader::bind_uniform(const char *name, const Texture &texture, int un
     glUniform1i(location, unit);
     texture.bind(unit);
 }
+
+void SimpleShader::bind_uniform(const std::string &name, float *value, int count) {
+    glUniform1fv(glGetUniformLocation(id, name.c_str()), count, value);
+}
