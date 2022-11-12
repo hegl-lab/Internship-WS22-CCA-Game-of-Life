@@ -104,5 +104,5 @@ void call_after_glfw_init(GLFWwindow *window) {
     in_texture.init();
     out_texture.init();
 
-    //init_game();
+    init_game();
 }
