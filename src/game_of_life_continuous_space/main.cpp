@@ -8,7 +8,6 @@ int width;
 int height;
 int delay;
 float frequency;
-float *kernel;
 int R;
 bool square;
 
@@ -17,6 +16,8 @@ FragmentOnlyShader step_shader("shaders/game_of_life_continuous_space/shader.fra
 
 Texture in_texture;
 Texture out_texture;
+
+Texture kernel;
 
 bool render_loop_call(GLFWwindow *window);
 
@@ -41,6 +42,7 @@ int main(int argc, char *argv[]) {
 bool render_loop_call(GLFWwindow *window) {
     step_shader.use();
     step_shader.bind_uniform("texture1", in_texture, 0);
+    step_shader.bind_uniform("kernel", kernel, 1);
     step_shader.render_to_texture(out_texture);
 
     passthrough_shader.use();
@@ -85,39 +87,45 @@ void call_after_glfw_init(GLFWwindow *window) {
             ));
     passthrough_shader.init_without_arguments();
 
-    in_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGB);
-    out_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGB);
+    in_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
+    out_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
     in_texture.init();
     out_texture.init();
 
-    // initialize kernel
-    kernel = new float[(2 * R + 1) * (2 * R + 1)];
+    // initialize kernel_data
+    auto *kernel_data = new float[(2 * R + 1) * (2 * R + 1)];
     if (square) {
-        // create square kernel
+        // create square kernel_data
         for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) {
-            kernel[x] = 1.0 / float((2 * R + 1) * (2 * R + 1));
+            kernel_data[x] = 1.0 / float((2 * R + 1) * (2 * R + 1));
         }
     } else {
-        // create donut kernel
+        // create donut kernel_data
         for (int x = 0; x < 2 * R + 1; ++x) {
             for (int y = 0; y < 2 * R + 1; ++y) {
                 float distance = std::pow(x - R, 2) + std::pow(y - R, 2);
                 if (distance <= std::pow(R, 2) && distance >= 9) {
-                    kernel[x * (2 * R + 1) + y] = 1.0;
+                    kernel_data[x * (2 * R + 1) + y] = 1.0;
                 } else {
-                    kernel[x * (2 * R + 1) + y] = 0.0;
+                    kernel_data[x * (2 * R + 1) + y] = 0.0;
                 }
             }
         }
-        // scale kernel
+        // scale kernel_data
         float sum = 0.0;
-        for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) sum += kernel[x];
-        for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) kernel[x] /= sum;
+        for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) sum += kernel_data[x];
+        for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) kernel_data[x] /= sum;
     }
-    kernel[R * (2 * R + 1) + R] = 0.0f;
+    kernel_data[R * (2 * R + 1) + R] = 0.0f;
 
-    step_shader.use();
-    step_shader.bind_uniform("kernel", kernel, (2 * R + 1) * (2 * R + 1));
+    kernel = Texture(2 * R + 1, 2 * R + 1, GL_R32F, GL_FLOAT, GL_RED);
+    kernel.init();
+    kernel.set_data(kernel_data);
+
+    delete[] kernel_data;
+
+    //step_shader.use();
+    //step_shader.bind_uniform("kernel_data", kernel_data, (2 * R + 1) * (2 * R + 1));
 
     init_game();
 }

@@ -13,6 +13,8 @@
 #define pixel_x 1.0 / width
 #define pixel_y 1.0 / height
 
+#define kernel_pixel 1.0 / (2.0 * R + 1.0)
+
 #define dt 1.0 / frequency
 
 out vec4 FragColor;
@@ -21,7 +23,8 @@ in vec3 ourColor;
 in vec2 TexCoord;
 
 uniform sampler2D texture1;
-uniform float kernel[(2 * R + 1) * (2 * R + 1)];
+//uniform float kernel[(2 * R + 1) * (2 * R + 1)];
+uniform sampler2D kernel;
 
 float growth(float neighbours) {
     if (neighbours >= 0.12 && neighbours <= 0.15) {
@@ -40,7 +43,7 @@ float state(vec2 position) {
     float neighbours = 0.0;
     for (int x = 0; x < 2 * R + 1; ++x) {
         for (int y = 0; y < 2 * R + 1; ++y) {
-            float k = kernel[x * (2 * R + 1) + y];
+            float k = texture(kernel, vec2(x * kernel_pixel, y * kernel_pixel)).x;
             if (k != 0.0) {
                 neighbours += k * texture(texture1, position + vec2((x - R) * pixel_x, (y - R) * pixel_y)).x;
             }
