@@ -24,7 +24,7 @@ void call_after_glfw_init(GLFWwindow *window);
 
 int main(int argc, char *argv[]) {
     if (argc != 6) {
-        std::cerr << "Expected format: " << argv[0] << " width height delay frequency R square|donut" << std::endl;
+        std::cerr << "Expected format: " << argv[0] << " width height delay frequency R" << std::endl;
         return 1;
     }
     width = std::stoi(argv[1]);
