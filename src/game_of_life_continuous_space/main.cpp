@@ -124,8 +124,5 @@ void call_after_glfw_init(GLFWwindow *window) {
 
     delete[] kernel_data;
 
-    //step_shader.use();
-    //step_shader.bind_uniform("kernel_data", kernel_data, (2 * R + 1) * (2 * R + 1));
-
     init_game();
 }
