@@ -16,31 +16,31 @@ add_library(glfw-abstraction ${glfw-abstraction_SRC})
 add_executable(max_resolution src/max_resolution.cpp)
 target_link_libraries(max_resolution glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(simple_compute src/game_of_life_simple/compute/main.cpp)
+add_executable(simple_compute src/simple/compute/main.cpp)
 target_link_libraries(simple_compute glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(simple_compute_benchmark src/game_of_life_simple/compute/benchmark.cpp)
+add_executable(simple_compute_benchmark src/simple/compute/benchmark.cpp)
 target_link_libraries(simple_compute_benchmark glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(simple_fragment src/game_of_life_simple/fragment/main.cpp)
+add_executable(simple_fragment src/simple/fragment/main.cpp)
 target_link_libraries(simple_fragment glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(simple_fragment_benchmark src/game_of_life_simple/fragment/benchmark.cpp)
+add_executable(simple_fragment_benchmark src/simple/fragment/benchmark.cpp)
 target_link_libraries(simple_fragment_benchmark glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(kernel src/game_of_life_kernel/main.cpp)
+add_executable(kernel src/kernel/main.cpp)
 target_link_libraries(kernel glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(growth src/game_of_life_growth/main.cpp)
+add_executable(growth src/growth/main.cpp)
 target_link_libraries(growth glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(larger_than_life src/game_of_life_larger_than_life/main.cpp)
+add_executable(larger_than_life src/larger_than_life/main.cpp)
 target_link_libraries(larger_than_life glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(continuous_states src/game_of_life_continuous_states/main.cpp)
+add_executable(continuous_states src/continuous_states/main.cpp)
 target_link_libraries(continuous_states glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
-add_executable(continuous_space src/game_of_life_continuous_space/main.cpp)
+add_executable(continuous_space src/continuous_space/main.cpp)
 target_link_libraries(continuous_space glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
 add_executable(smooth_kernel src/game_of_life_smooth_kernel/main.cpp)

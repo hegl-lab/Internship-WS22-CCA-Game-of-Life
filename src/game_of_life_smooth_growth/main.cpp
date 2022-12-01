@@ -14,7 +14,7 @@ float m = 0.135;
 float s = 0.015;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/game_of_life_smooth_growth/shader.frag");
+FragmentOnlyShader step_shader("shaders/smooth_growth/shader.frag");
 FragmentOnlyShader hue_rotation("shaders/hue_rotation.frag");
 
 Texture in_texture;

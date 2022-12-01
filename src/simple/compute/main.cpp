@@ -1,16 +1,18 @@
 #include <thread>
-#include <vector>
+
 #include "../../glfw-abstraction/Init.h"
-#include "../../glfw-abstraction/FragmentOnlyShader.h"
-#include "../../glfw-abstraction/Arguments.h"
+
+
 #include "../../glfw-abstraction/PassthroughShader.h"
+#include "../../glfw-abstraction/SimpleComputeShader.h"
+#include "../../glfw-abstraction/Arguments.h"
 
 int width;
 int height;
 int delay;
 
+SimpleComputeShader compute_shader("shaders/simple/compute/shader.comp");
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/game_of_life_simple/fragment/shader.frag");
 
 Texture in_texture;
 Texture out_texture;
@@ -33,27 +35,32 @@ int main(int argc, char *argv[]) {
 }
 
 bool render_loop_call(GLFWwindow *window) {
-    step_shader.use();
-    step_shader.bind_uniform("texture1", in_texture, 0);
-    step_shader.render_to_texture(out_texture);
+    compute_shader.use();
+
+    compute_shader.bind_uniform("input_texture", in_texture, 0, GL_READ_WRITE);
+    compute_shader.bind_uniform("output_texture", out_texture, 1, GL_READ_WRITE);
+
+    compute_shader.dispatch(width, height, 1);
+    compute_shader.wait();
 
     passthrough_shader.use();
     passthrough_shader.render_to_texture(out_texture, in_texture);
     passthrough_shader.render_to_window(out_texture);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     return true;
 }
 
 void init_game() {
-    std::vector<float> values(3 * width * height);
+    std::vector<float> values(4 * width * height);
     for (float &val: values) val = 0.0;
 
     auto set_pixel = [&](int x, int y) {
-        int cord = 3 * (x * height + y);
+        int cord = 4 * (x * height + y);
         values[cord] = 1.0;
         values[cord + 1] = 1.0;
         values[cord + 2] = 1.0;
+        values[cord + 3] = 1.0;
     };
 
     set_pixel(10, 10);
@@ -85,15 +92,15 @@ void init_game() {
 }
 
 void call_after_glfw_init(GLFWwindow *window) {
-    step_shader.init(
+    compute_shader.init(
             generate_arguments_with_default_marker(
                     Argument<int>{"width", width},
                     Argument<int>{"height", height}
             ));
     passthrough_shader.init_without_arguments();
 
-    in_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGB);
-    out_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGB);
+    in_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGBA);
+    out_texture = Texture(width, height, GL_RGBA32F, GL_FLOAT, GL_RGBA);
     in_texture.init();
     out_texture.init();
 
