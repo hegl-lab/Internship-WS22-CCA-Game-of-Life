@@ -10,11 +10,12 @@ int delay;
 float frequency;
 int R;
 bool orbium = false;
-float m = 0.15;
+float m = 0.135;
 float s = 0.015;
 
 PassthroughShader passthrough_shader;
 FragmentOnlyShader step_shader("shaders/game_of_life_smooth_growth/shader.frag");
+FragmentOnlyShader hue_rotation("shaders/hue_rotation.frag");
 
 Texture in_texture;
 Texture out_texture;
@@ -41,7 +42,7 @@ int main(int argc, char *argv[]) {
         R = std::stoi(argv[5]);
     }
 
-    init<render_loop_call, call_after_glfw_init>(width, height);
+    init<render_loop_call, call_after_glfw_init>(500, 500);
     return 0;
 }
 
@@ -53,7 +54,10 @@ bool render_loop_call(GLFWwindow *window) {
 
     passthrough_shader.use();
     passthrough_shader.render_to_texture(out_texture, in_texture);
-    passthrough_shader.render_to_window(in_texture);
+
+    hue_rotation.use();
+    hue_rotation.bind_uniform("texture1", out_texture, 0);
+    hue_rotation.render_to_window();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     return true;
@@ -132,10 +136,11 @@ void call_after_glfw_init(GLFWwindow *window) {
                     Argument<int>{"height", height},
                     Argument<float>{"frequency", frequency},
                     Argument<int>{"R", R},
-                    Argument<float>{"m", 0.135},
-                    Argument<float>{"s", 0.015}
+                    Argument<float>{"m", m},
+                    Argument<float>{"s", s}
             ));
     passthrough_shader.init_without_arguments();
+    hue_rotation.init_without_arguments();
 
     in_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
     out_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
