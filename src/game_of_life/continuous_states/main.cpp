@@ -1,7 +1,7 @@
 #include <thread>
 #include <vector>
 #include <random>
-#include "../../glfw-abstraction/GLFWAbstraction.h"
+#include <GLFWAbstraction.h>
 
 int width;
 int height;

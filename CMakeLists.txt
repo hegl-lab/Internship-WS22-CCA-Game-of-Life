@@ -4,7 +4,7 @@ project(game_of_life)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src/glfw-abstraction)
 
 set(GL_LIBRARY GL GLU X11)
 

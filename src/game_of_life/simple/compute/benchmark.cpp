@@ -1,8 +1,5 @@
 #include <thread>
-#include "../../../glfw-abstraction/Init.h"
-#include "../../../glfw-abstraction/SimpleComputeShader.h"
-#include "../../../glfw-abstraction/PassthroughShader.h"
-#include "../../../glfw-abstraction/Arguments.h"
+#include <GLFWAbstraction.h>
 
 int width = 100;
 int height = 100;

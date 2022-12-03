@@ -1,9 +1,6 @@
 #include <thread>
 #include <vector>
-#include "../../../glfw-abstraction/Init.h"
-#include "../../../glfw-abstraction/FragmentOnlyShader.h"
-#include "../../../glfw-abstraction/Arguments.h"
-#include "../../../glfw-abstraction/PassthroughShader.h"
+#include <GLFWAbstraction.h>
 
 int width;
 int height;

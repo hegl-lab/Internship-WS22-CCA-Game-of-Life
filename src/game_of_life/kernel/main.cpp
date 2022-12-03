@@ -1,6 +1,6 @@
 #include <thread>
 #include <vector>
-#include "../../glfw-abstraction/GLFWAbstraction.h"
+#include <GLFWAbstraction.h>
 
 int width;
 int height;
