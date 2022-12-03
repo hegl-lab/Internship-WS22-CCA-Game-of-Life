@@ -2,7 +2,7 @@
 #include <vector>
 #include <random>
 #include <cstring>
-#include "../glfw-abstraction/GLFWAbstraction.h"
+#include "../../glfw-abstraction/GLFWAbstraction.h"
 
 int width;
 int height;

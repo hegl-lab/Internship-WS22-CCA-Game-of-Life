@@ -1,13 +1,13 @@
 #include <thread>
 #include <vector>
-#include "../glfw-abstraction/GLFWAbstraction.h"
+#include "../../glfw-abstraction/GLFWAbstraction.h"
 
 int width;
 int height;
 int delay;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/larger_than_life/shader.frag");
+FragmentOnlyShader step_shader("shaders/growth/shader.frag");
 
 Texture in_texture;
 Texture out_texture;
@@ -53,14 +53,30 @@ void init_game() {
         values[cord + 2] = 1.0;
     };
 
-    std::vector<std::vector<int>> cell = {{0,0,0,0,1,0,0,0,0,0}, {0,0,1,1,1,1,1,0,0,0}, {0,1,1,0,0,1,1,1,1,0}, {1,1,0,0,0,1,1,1,1,1}, {1,0,0,0,0,0,1,1,1,1}, {1,1,0,0,0,0,1,1,1,1}, {1,1,1,0,1,1,1,1,1,1}, {0,1,1,1,1,1,1,1,1,0}, {0,1,1,1,1,1,1,1,0,0}, {0,0,1,1,1,1,1,0,0,0}, {0,0,0,1,1,1,0,0,0,0}};
-    for (int x = 0; x < cell.size(); ++x) {
-        for (int y = 0; y < cell[0].size(); ++y) {
-            if (cell[x][y] != 0) {
-                set_pixel(x + 30, y + 30);
-            }
-        }
-    }
+    set_pixel(10, 10);
+    set_pixel(11, 10);
+    set_pixel(11, 11);
+    set_pixel(10, 11);
+    set_pixel(12, 12);
+    set_pixel(13, 12);
+    set_pixel(13, 13);
+    set_pixel(12, 13);
+
+    set_pixel(51, 50);
+    set_pixel(52, 50);
+    set_pixel(53, 50);
+    set_pixel(54, 50);
+    set_pixel(55, 50);
+    set_pixel(56, 50);
+
+    set_pixel(50, 49);
+    set_pixel(56, 49);
+    set_pixel(56, 48);
+    set_pixel(55, 47);
+    set_pixel(50, 47);
+
+    set_pixel(52, 46);
+    set_pixel(53, 46);
 
     in_texture.set_data(values.data());
 }

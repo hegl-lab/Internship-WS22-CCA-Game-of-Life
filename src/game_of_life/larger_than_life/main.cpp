@@ -1,15 +1,13 @@
 #include <thread>
 #include <vector>
-#include <random>
-#include "../glfw-abstraction/GLFWAbstraction.h"
+#include "../../glfw-abstraction/GLFWAbstraction.h"
 
 int width;
 int height;
 int delay;
-float frequency;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/continuous_states/shader.frag");
+FragmentOnlyShader step_shader("shaders/larger_than_life/shader.frag");
 
 Texture in_texture;
 Texture out_texture;
@@ -19,14 +17,13 @@ bool render_loop_call(GLFWwindow *window);
 void call_after_glfw_init(GLFWwindow *window);
 
 int main(int argc, char *argv[]) {
-    if (argc != 5) {
-        std::cerr << "Expected format: " << argv[0] << " width height delay frequency" << std::endl;
+    if (argc != 4) {
+        std::cerr << "Expected format: " << argv[0] << " width height delay" << std::endl;
         return 1;
     }
     width = std::stoi(argv[1]);
     height = std::stoi(argv[2]);
     delay = std::stoi(argv[3]);
-    frequency = std::stof(argv[4]);
 
     init<render_loop_call, call_after_glfw_init>(width, height);
     return 0;
@@ -49,20 +46,19 @@ void init_game() {
     std::vector<float> values(3 * width * height);
     for (float &val: values) val = 0.0;
 
-    auto set_pixel = [&](int x, int y, float value) {
+    auto set_pixel = [&](int x, int y) {
         int cord = 3 * (x * height + y);
-        values[cord] = value;
-        values[cord + 1] = value;
-        values[cord + 2] = value;
+        values[cord] = 1.0;
+        values[cord + 1] = 1.0;
+        values[cord + 2] = 1.0;
     };
 
-    // generate random values to fill the grid
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> distribution(0,1);
-    for (int x = 0; x < width; ++x) {
-        for (int y = 0; y < height; ++y) {
-            set_pixel(x, y, distribution(rng));
+    std::vector<std::vector<int>> cell = {{0,0,0,0,1,0,0,0,0,0}, {0,0,1,1,1,1,1,0,0,0}, {0,1,1,0,0,1,1,1,1,0}, {1,1,0,0,0,1,1,1,1,1}, {1,0,0,0,0,0,1,1,1,1}, {1,1,0,0,0,0,1,1,1,1}, {1,1,1,0,1,1,1,1,1,1}, {0,1,1,1,1,1,1,1,1,0}, {0,1,1,1,1,1,1,1,0,0}, {0,0,1,1,1,1,1,0,0,0}, {0,0,0,1,1,1,0,0,0,0}};
+    for (int x = 0; x < cell.size(); ++x) {
+        for (int y = 0; y < cell[0].size(); ++y) {
+            if (cell[x][y] != 0) {
+                set_pixel(x + 30, y + 30);
+            }
         }
     }
 
@@ -73,8 +69,7 @@ void call_after_glfw_init(GLFWwindow *window) {
     step_shader.init(
             generate_arguments_with_default_marker(
                     Argument<int>{"width", width},
-                    Argument<int>{"height", height},
-                    Argument<float>{"frequency", frequency}
+                    Argument<int>{"height", height}
             ));
     passthrough_shader.init_without_arguments();
 

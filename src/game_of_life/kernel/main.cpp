@@ -1,13 +1,13 @@
 #include <thread>
 #include <vector>
-#include "../glfw-abstraction/GLFWAbstraction.h"
+#include "../../glfw-abstraction/GLFWAbstraction.h"
 
 int width;
 int height;
 int delay;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/growth/shader.frag");
+FragmentOnlyShader step_shader("shaders/kernel/shader.frag");
 
 Texture in_texture;
 Texture out_texture;
