@@ -44,7 +44,7 @@ void SimpleComputeShader::init(const std::string &arguments) {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n" << infoLog << std::endl;
         for (int i = 1; compute_code.length() > 0; ++i) {
-            auto position = compute_code.find('\n');
+            int position = compute_code.find('\n');
             std::string line = std::to_string(i) + "\t" + compute_code.substr(0, position);
             if (position >= 0) compute_code.erase(0, position + 1);
             else compute_code = "";
