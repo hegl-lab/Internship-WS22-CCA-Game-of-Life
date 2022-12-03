@@ -82,3 +82,19 @@ void SimpleComputeShader::bind_uniform(const char *name, const Texture &texture,
     glUniform1i(location, unit);
     texture.bind_compute(unit, access_mode);
 }
+
+void SimpleComputeShader::bind_uniform(const std::string &name, bool value) const {
+    glUniform1i(glGetUniformLocation(id, name.c_str()), (int) value);
+}
+
+void SimpleComputeShader::bind_uniform(const std::string &name, int value) const {
+    glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+}
+
+void SimpleComputeShader::bind_uniform(const std::string &name, float value) const {
+    glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+}
+
+void SimpleComputeShader::bind_uniform(const std::string &name, float *value, int count) const {
+    glUniform1fv(glGetUniformLocation(id, name.c_str()), count, value);
+}

@@ -49,6 +49,34 @@ public:
      */
     void bind_uniform(const char *name, const Texture &texture, int unit, int access_mode) const;
 
+    /**
+     * Binds a bool to a uniform in the shaders.
+     * @param name name of the uniform
+     * @param value value to bind
+     */
+    void bind_uniform(const std::string &name, bool value) const;
+
+    /**
+     * Binds an int to a uniform in the shaders.
+     * @param name name of the uniform
+     * @param value value to bind
+     */
+    void bind_uniform(const std::string &name, int value) const;
+
+    /**
+     * Binds a float value to a uniform in the shaders.
+     * @param name name of the uniform
+     * @param value value to bind
+     */
+    void bind_uniform(const std::string &name, float value) const;
+
+    /**
+     * Binds an array to a uniform in the shaders.
+     * @param name name of the uniform
+     * @param value value to bind
+     * @param count number of values in the array
+     */
+    void bind_uniform(const std::string &name, float *value, int count) const;
 private:
     const char *path;
 };

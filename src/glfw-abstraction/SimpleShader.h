@@ -61,7 +61,7 @@ public:
      * @param value value to bind
      * @param count number of values in the array
      */
-    void bind_uniform(const std::string &name, float *value, int count);
+    void bind_uniform(const std::string &name, float *value, int count) const;
 
 private:
     const char *vertexPath;
