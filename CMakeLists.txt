@@ -13,42 +13,25 @@ add_library(glad src/glad.c)
 file(GLOB glfw-abstraction_SRC "src/glfw-abstraction/*.cpp")
 add_library(glfw-abstraction ${glfw-abstraction_SRC})
 
+# link libraries that all targets share to all targets
+link_libraries(glfw ${GL_LIBRARY} m glad glfw-abstraction)
+
 add_executable(max_resolution src/max_resolution.cpp)
-target_link_libraries(max_resolution glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
+# demos of different GoL versions
 add_executable(simple_compute src/game_of_life/simple/compute/main.cpp)
-target_link_libraries(simple_compute glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(simple_compute_benchmark src/game_of_life/simple/compute/benchmark.cpp)
-target_link_libraries(simple_compute_benchmark glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(simple_fragment src/game_of_life/simple/fragment/main.cpp)
-target_link_libraries(simple_fragment glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(simple_fragment_benchmark src/game_of_life/simple/fragment/benchmark.cpp)
-target_link_libraries(simple_fragment_benchmark glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(kernel src/game_of_life/kernel/main.cpp)
-target_link_libraries(kernel glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(growth src/game_of_life/growth/main.cpp)
-target_link_libraries(growth glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(larger_than_life src/game_of_life/larger_than_life/main.cpp)
-target_link_libraries(larger_than_life glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(continuous_states src/game_of_life/continuous_states/main.cpp)
-target_link_libraries(continuous_states glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(continuous_space src/game_of_life/continuous_space/main.cpp)
-target_link_libraries(continuous_space glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(smooth_kernel src/game_of_life/smooth_kernel/main.cpp)
-target_link_libraries(smooth_kernel glfw ${GL_LIBRARY} m glad glfw-abstraction)
-
 add_executable(smooth_growth src/game_of_life/smooth_growth/main.cpp)
-target_link_libraries(smooth_growth glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
+# copy shader files to binary folder
 add_custom_target(copy-shaders ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
         DEPENDS ${MY_TARGET})
