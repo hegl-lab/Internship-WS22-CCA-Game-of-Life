@@ -7,7 +7,7 @@ int runs = 10;
 bool readable = true;
 
 PassthroughShader passthrough_shader;
-SimpleComputeShader compute_shader("shaders/simple/compute/shader.comp");
+SimpleComputeShader compute_shader("shaders/game_of_life/simple/compute/shader.comp");
 
 Texture in_texture;
 Texture out_texture;

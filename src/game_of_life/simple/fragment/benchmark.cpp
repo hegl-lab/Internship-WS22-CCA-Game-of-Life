@@ -8,7 +8,7 @@ int runs = 10;
 bool readable = true;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/simple/fragment/shader.frag");
+FragmentOnlyShader step_shader("shaders/game_of_life/simple/fragment/shader.frag");
 
 Texture in_texture;
 Texture out_texture;

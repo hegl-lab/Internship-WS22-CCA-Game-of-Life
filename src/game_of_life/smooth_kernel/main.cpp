@@ -10,7 +10,7 @@ float frequency;
 int R;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/continuous_space/shader.frag");
+FragmentOnlyShader step_shader("shaders/game_of_life/continuous_space/shader.frag");
 
 Texture in_texture;
 Texture out_texture;

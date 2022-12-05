@@ -7,7 +7,7 @@ int height;
 int delay;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/growth/shader.frag");
+FragmentOnlyShader step_shader("shaders/game_of_life/growth/shader.frag");
 
 Texture in_texture;
 Texture out_texture;

@@ -9,7 +9,7 @@ int delay;
 float frequency;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/continuous_states/shader.frag");
+FragmentOnlyShader step_shader("shaders/game_of_life/continuous_states/shader.frag");
 
 Texture in_texture;
 Texture out_texture;

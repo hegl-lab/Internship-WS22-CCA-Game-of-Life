@@ -6,7 +6,7 @@ int width;
 int height;
 int delay;
 
-SimpleComputeShader compute_shader("shaders/simple/compute/shader.comp");
+SimpleComputeShader compute_shader("shaders/game_of_life/simple/compute/shader.comp");
 PassthroughShader passthrough_shader;
 
 Texture in_texture;
