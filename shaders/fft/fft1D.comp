@@ -1,0 +1,66 @@
+#version 430 core
+
+// Implementation of Cooley-Tukey FFT algorithm
+// THE MATRIX IS ASSUMED TO BE IN R^(2^n x 2^n)!
+
+// we use the following block to define constants
+// this way our IDE knows which constants to expect
+// but we can still replace them
+#ifndef default_consts
+#define IMAGE_FORMAT rg32f
+#endif // default_consts
+
+// this shader uses the following additional defines
+// to change it's behaviour
+// - ROWS: work on the rows of the matrix, default behaviour is to work on the columns
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (IMAGE_FORMAT) uniform image2D A;
+
+// m = 2^run
+uniform int m;
+// m2 = m/2 = 2^(run-1)
+uniform int m2;
+// omega_m_real = cos(2 * pi / m)
+uniform float omega_m_real;
+// omega_m_complex = -sin(2 * pi / m)
+uniform float omega_m_complex;
+
+void main() {
+    ivec2 position = ivec2(gl_WorkGroupID.xy);
+    int k = position.x * m;
+    int y = position.y;
+
+    float omega_real = 1.0;
+    float omega_complex = 0.0;
+
+    for (int j = 0; j < m2; ++j) {
+        #ifdef ROWS
+        // row case
+        ivec2 pos1 = ivec2(k + j + m2, y);
+        ivec2 pos2 = ivec2(k + j, y);
+        #else
+        // column case
+        ivec2 pos1 = ivec2(y, k + j + m2);
+        ivec2 pos2 = ivec2(y, k + j);
+        #endif
+
+        vec4 state1 = imageLoad(A, pos1);
+
+        // t = omega * A[k + j + m2]
+        float t_real = omega_real * state1.x - omega_complex * state1.y;
+        float t_complex = omega_real * state1.y + omega_complex * state1.x;
+
+        vec4 u = imageLoad(A, pos2);
+
+        // A[k + j] = u + t
+        imageStore(A, pos2, vec4(u.x + t_real, u.y + t_complex, 0.0, 1.0));
+        // A[k + j + m2] = u - t
+        imageStore(A, pos1, vec4(u.x - t_real, u.y - t_complex, 0.0, 1.0));
+
+        // omega = omega * omega_m
+        float omega_real_tmp = omega_real;
+        omega_real = omega_real * omega_m_real - omega_complex * omega_m_complex;
+        omega_complex = omega_complex * omega_m_real + omega_real_tmp * omega_m_complex;
+    }
+}

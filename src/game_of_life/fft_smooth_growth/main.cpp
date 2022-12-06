@@ -2,7 +2,8 @@
 #include <vector>
 #include <random>
 #include <cstring>
-#include "../glfw-abstraction/GLFWAbstraction.h"
+#include <GLFWAbstraction.h>
+#include "../../fft/IFFT2D.h"
 
 int width;
 int height;
@@ -14,11 +15,14 @@ float m = 0.135;
 float s = 0.015;
 
 PassthroughShader passthrough_shader;
-FragmentOnlyShader step_shader("shaders/game_of_life/smooth_growth/shader.frag");
+FragmentOnlyShader growth_shader("shaders/game_of_life/fft_smooth_growth/growth.frag");
+FragmentOnlyShader product_shader("shaders/game_of_life/fft_smooth_growth/product.frag");
 FragmentOnlyShader hue_rotation("shaders/hue_rotation.frag");
+IFFT2D ifft2D;
 
-Texture in_texture;
-Texture out_texture;
+Texture current_state;
+Texture previous_state;
+Texture update_state;
 
 Texture kernel;
 
@@ -42,36 +46,49 @@ int main(int argc, char *argv[]) {
         R = std::stoi(argv[5]);
     }
 
-    init<render_loop_call, call_after_glfw_init>(width, height);
+    init<render_loop_call, call_after_glfw_init>(500, 500);
     return 0;
 }
 
 bool render_loop_call(GLFWwindow *window) {
-    step_shader.use();
-    step_shader.bind_uniform("texture1", in_texture, 0);
-    step_shader.bind_uniform("kernel", kernel, 1);
-    step_shader.render_to_texture(out_texture);
-
+    // copy current state, since we will need again later and the content of one of the
+    // texture will be replaced with the fourier transformation
     passthrough_shader.use();
-    passthrough_shader.render_to_texture(out_texture, in_texture);
+    passthrough_shader.render_to_texture(current_state, previous_state);
 
+    // calculate F(current_state)
+    ifft2D.fft2D.compute(current_state);
+
+    // calculate F(current_state) * F(K) where * is the scalar product
+    product_shader.use();
+    product_shader.bind_uniform("G", current_state, 0);
+    product_shader.bind_uniform("K", kernel, 1);
+    product_shader.render_to_texture(update_state);
+
+    // calculate update_state = F^-1(F(current_state) * F(K)) which equals the update rate
+    ifft2D.compute_inverse(update_state);
+
+    // calculate current_state = previous_state + growth(update_state)
+    growth_shader.use();
+    growth_shader.bind_uniform("source_state", previous_state, 0);
+    growth_shader.bind_uniform("update", update_state, 1);
+    growth_shader.render_to_texture(current_state);
+
+    // display result
     hue_rotation.use();
-    hue_rotation.bind_uniform("texture1", out_texture, 0);
+    hue_rotation.bind_uniform("texture1", current_state, 0);
     hue_rotation.render_to_window();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     return true;
 }
 
 void init_game() {
-    std::vector<float> values(3 * width * height);
+    std::vector<float> values(2 * width * height);
     for (float &val: values) val = 0.0;
 
     auto set_pixel = [&](int x, int y, float value) {
-        int cord = (x * height + y);
+        int cord = 2 * (x * height + y);
         values[cord] = value;
-        //values[cord + 1] = value;
-        //values[cord + 2] = value;
     };
 
     if (orbium) {
@@ -112,7 +129,7 @@ void init_game() {
         std::uniform_int_distribution<int> distribution_y(0, height - 20);
 
         for (int x = 0; x < 1; ++x) {
-            insert_orbium(distribution_x(rng), distribution_y(rng));
+            insert_orbium(width / 2 - 10, height / 2 - 10);
         }
     } else {
         // generate random values to fill the grid
@@ -126,52 +143,76 @@ void init_game() {
         }
     }
 
-    in_texture.set_data(values.data());
+    current_state.set_data(values.data());
 }
 
 void call_after_glfw_init(GLFWwindow *window) {
-    step_shader.init(
+    growth_shader.init(
+            generate_arguments_with_default_marker(
+                    Argument<float>{"m", m},
+                    Argument<float>{"s", s},
+                    Argument<float>{"frequency", frequency}
+            ));
+    product_shader.init(
             generate_arguments_with_default_marker(
                     Argument<int>{"width", width},
-                    Argument<int>{"height", height},
-                    Argument<float>{"frequency", frequency},
-                    Argument<int>{"R", R},
-                    Argument<float>{"m", m},
-                    Argument<float>{"s", s}
-            ));
+                    Argument<int>{"height", height}
+            )
+    );
     passthrough_shader.init_without_arguments();
     hue_rotation.init_without_arguments();
 
-    in_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
-    out_texture = Texture(width, height, GL_R32F, GL_FLOAT, GL_RED);
-    in_texture.init();
-    out_texture.init();
+    current_state = Texture(width, height, GL_RG32F, GL_FLOAT, GL_RG);
+    update_state = Texture(width, height, GL_RG32F, GL_FLOAT, GL_RG);
+    previous_state = Texture(width, height, GL_RG32F, GL_FLOAT, GL_RG);
+    current_state.init();
+    update_state.init();
+    previous_state.init();
 
     // initialize kernel_data
-    auto *kernel_data = new float[(2 * R + 1) * (2 * R + 1)];
-    //
+    std::vector<float> kernel_data(2 * width * height);
+    for (int i = 0; i < 2 * width * height; ++i) kernel_data[i] = 0.0;
     auto bell_function = [](double value, double m = 0.5, double s = 0.15) {
         return std::exp(-std::pow((value - m) / s, 2) / 2);
     };
-    // set kernel values based on distance
-    for (int x = 0; x < 2 * R + 1; ++x) {
-        for (int y = 0; y < 2 * R + 1; ++y) {
-            double distance = std::sqrt(std::pow((x - R + 1), 2) + std::pow(y - R + 1, 2));
-            kernel_data[x * (2 * R + 1) + y] = float(bell_function((distance) / R));
+    int x_center = width / 2;
+    int y_center = height / 2;
+
+    for (int x = 0; x < width; ++x) {
+        for (int y = 0; y < height; ++y) {
+            double distance = std::sqrt(std::pow(x - x_center, 2) + std::pow(y - y_center, 2)) / R;
+            int pos = 2 * (x * height + y);
+            if (distance < 1.0) kernel_data[pos] = float(bell_function(distance));
         }
     }
+
+    // switch around quadrants
+    for (int x = 0; x < width / 2; ++x) {
+        for (int y = 0; y < height / 2; ++y) {
+            int pos1 = 2 * (x * height + y);
+            int pos2 = 2 * (x * height + y + width * height / 2 + height / 2);
+
+            std::swap(kernel_data[pos1], kernel_data[pos2]);
+
+            int pos3 = 2 * (x * height + y + width / 2 * height);
+            int pos4 = 2 * (x * height + y + height / 2);
+
+            std::swap(kernel_data[pos3], kernel_data[pos4]);
+        }
+    }
+
     // scale kernel_data
-    float sum = 0.0;
-    for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) sum += kernel_data[x];
-    for (int x = 0; x < (2 * R + 1) * (2 * R + 1); ++x) kernel_data[x] /= sum;
+    double sum = 0.0;
+    for (int x = 0; x < 2 * width * height; ++x) sum += kernel_data[x];
+    for (int x = 0; x < 2 * width * height; ++x) kernel_data[x] /= sum;
 
-    kernel_data[R * (2 * R + 1) + R] = 0.0f;
-
-    kernel = Texture(2 * R + 1, 2 * R + 1, GL_R32F, GL_FLOAT, GL_RED);
+    kernel = Texture(width, height, GL_RG32F, GL_FLOAT, GL_RG);
     kernel.init();
-    kernel.set_data(kernel_data);
+    kernel.set_data(kernel_data.data());
 
-    delete[] kernel_data;
+    ifft2D.init_without_arguments();
+
+    ifft2D.fft2D.compute(kernel);
 
     init_game();
 }

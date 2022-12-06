@@ -1,0 +1,49 @@
+#version 430 core
+
+// THE MATRIX IS ASSUMED TO BE IN R^(2^n x 2^n)!
+
+// we use the following block to define constants
+// this way our IDE knows which constants to expect
+// but we can still replace them
+#ifndef default_consts
+#define IMAGE_FORMAT rg32f
+#endif // default_consts
+
+// this shader uses the following additional defines
+// to change it's behaviour
+// - ROWS: work on the rows of the matrix, default behaviour is to work on the columns
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (IMAGE_FORMAT) uniform image2D A;
+
+// n = log_2(width) - 1 or n = log_2(height) - 1 depending on wether or not ROWS is defined
+uniform int n;
+
+int reverse(int num) {
+    int s = n;
+    int result = num & 1;
+    for (num >>= 1; num != 0; num >>= 1) {
+        result <<= 1;
+        result |= num & 1;
+        --s;
+    }
+    result <<= s;
+    return result;
+}
+
+void main() {
+    ivec2 position = ivec2(gl_WorkGroupID.xy);
+    int x1 = reverse(position.x);
+
+    if (x1 > position.x) {
+        #ifdef ROWS
+        vec4 state1 = imageLoad(A, position);
+        imageStore(A, position, imageLoad(A, ivec2(x1, position.y)));
+        imageStore(A, ivec2(x1, position.y), state1);
+        #else
+        vec4 state1 = imageLoad(A, position.yx);
+        imageStore(A, position.yx, imageLoad(A, ivec2(position.y, x1)));
+        imageStore(A, ivec2(position.y, x1), state1);
+        #endif
+    }
+}

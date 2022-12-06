@@ -1,0 +1,17 @@
+#version 430 core
+
+// we use the following block to define constants
+// this way our IDE knows which constants to expect
+// but we can still replace them
+#ifndef default_consts
+#define IMAGE_FORMAT rg32f
+#endif // default_consts
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (IMAGE_FORMAT) uniform image2D A;
+
+void main() {
+    ivec2 position = ivec2(gl_WorkGroupID.xy);
+    vec4 state = imageLoad(A, position);
+    imageStore(A, position, state.yxza);
+}

@@ -16,6 +16,10 @@ add_library(glfw-abstraction ${glfw-abstraction_SRC})
 # link libraries that all targets share to all targets
 link_libraries(glfw ${GL_LIBRARY} m glad glfw-abstraction)
 
+# library for fft
+file(GLOB fft_SRC "src/fft/*.cpp")
+add_library(fft ${fft_SRC})
+
 add_executable(max_resolution src/max_resolution.cpp)
 
 # demos of different GoL versions
