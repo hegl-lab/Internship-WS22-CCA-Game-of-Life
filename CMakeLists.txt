@@ -34,6 +34,12 @@ add_executable(continuous_states src/game_of_life/continuous_states/main.cpp)
 add_executable(continuous_space src/game_of_life/continuous_space/main.cpp)
 add_executable(smooth_kernel src/game_of_life/smooth_kernel/main.cpp)
 add_executable(smooth_growth src/game_of_life/smooth_growth/main.cpp)
+add_executable(smooth_growth_benchmark src/game_of_life/smooth_growth/benchmark.cpp)
+add_executable(fft_smooth_growth src/game_of_life/fft_smooth_growth/main.cpp)
+target_link_libraries(fft_smooth_growth fft)
+add_executable(fft_smooth_growth_benchmark src/game_of_life/fft_smooth_growth/benchmark.cpp)
+target_link_libraries(fft_smooth_growth_benchmark fft)
+
 
 # copy shader files to binary folder
 add_custom_target(copy-shaders ALL
