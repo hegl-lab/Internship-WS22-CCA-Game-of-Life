@@ -35,12 +35,22 @@ bool render_loop_call(GLFWwindow *window);
 void call_after_glfw_init(GLFWwindow *window);
 
 int main(int argc, char *argv[]) {
-    R = 13;
-    width = 64 * 4;
-    height = 64 * 4;
-    orbium = true;
+    if (argc != 6) {
+        std::cerr << "Expected format: " << argv[0] << " width height delay frequency R|orbium" << std::endl;
+        return 1;
+    }
+    width = std::stoi(argv[1]);
+    height = std::stoi(argv[2]);
+    delay = std::stoi(argv[3]);
+    frequency = std::stof(argv[4]);
+    if (std::strcmp(argv[5], "orbium") == 0) {
+        R = 13;
+        orbium = true;
+    } else {
+        R = std::stoi(argv[5]);
+    }
 
-    init<render_loop_call, call_after_glfw_init>(10, 10);
+    init<render_loop_call, call_after_glfw_init>(width, height);
     return 0;
 }
 
@@ -149,22 +159,9 @@ void init_kernel() {
     kernel.set_data(kernel_data);
 }
 
-int run = 0;
-long measurement = 0;
-
 bool render_loop_call(GLFWwindow *window) {
-    if (run == 1000) {
-        std::cout << measurement << std::endl;
-        return false;
-    }
-    ++run;
-
     // calculate fourier_current = F(current_state)
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     fft_complex_forward.compute(current_state, fourier_current);
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    measurement += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << std::endl;
 
     // calculate the scalar product of fourier_current and kernel
     buffer_product.use();
@@ -182,7 +179,7 @@ bool render_loop_call(GLFWwindow *window) {
     buffer_growth.wait();
     //std::cout << fourier_current.get_data()[10] << std::endl;
 
-/*    buffer_to_texture.use();
+    buffer_to_texture.use();
     buffer_to_texture.bind_uniform("A", render_texture, 0, GL_WRITE_ONLY);
     buffer_to_texture.bind_buffer("shader_data", current_state, 1);
     buffer_to_texture.bind_uniform("width", width);
@@ -191,13 +188,12 @@ bool render_loop_call(GLFWwindow *window) {
 
     hue_rotation.use();
     hue_rotation.bind_uniform("texture1", render_texture, 0);
-    hue_rotation.render_to_window();*/
+    hue_rotation.render_to_window();
 
     return true;
 }
 
 void call_after_glfw_init(GLFWwindow *window) {
-    //fft_real_forward.init(width, height, false, false, GLFFT::RealToComplex);
     fft_complex_forward.init(width, height, false, false, GLFFT::ComplexToComplex);
     fft_inverse.init(width, height, true, true, GLFFT::ComplexToComplex);
 
