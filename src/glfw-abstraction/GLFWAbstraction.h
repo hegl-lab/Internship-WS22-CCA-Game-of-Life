@@ -8,5 +8,6 @@
 #include "SimpleComputeShader.h"
 #include "SimpleShader.h"
 #include "Texture.h"
+#include "Buffer.h"
 
 #endif //GAME_OF_LIFE_GLFWABSTRACTION_H

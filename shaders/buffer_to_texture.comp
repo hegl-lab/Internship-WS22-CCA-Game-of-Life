@@ -4,14 +4,18 @@
 // this way our IDE knows which constants to expect
 // but we can still replace them
 #ifndef default_consts
-#define IMAGE_FORMAT rg32f
+#define IMAGE_FORMAT r32f
 #endif // default_consts
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout (IMAGE_FORMAT) uniform image2D A;
+layout (std430) buffer shader_data {
+    float[] values;
+};
+uniform int width;
 
 void main() {
     ivec2 position = ivec2(gl_WorkGroupID.xy);
-    vec4 state = imageLoad(A, position);
-    imageStore(A, position, vec4(state.y, state.x, 0.0, 1.0));
+    float value = values[2 * (position.y * width + position.x)];
+    imageStore(A, position, vec4(value, value, value, 1.0));
 }

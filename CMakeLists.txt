@@ -4,7 +4,7 @@ project(game_of_life)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src/glfw-abstraction)
+include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src/glfw-abstraction ${PROJECT_SOURCE_DIR}/include/glfft/test/glfw)
 
 set(GL_LIBRARY GL GLU X11)
 
@@ -19,6 +19,9 @@ link_libraries(glfw ${GL_LIBRARY} m glad glfw-abstraction)
 # library for fft
 file(GLOB fft_SRC "src/fft/*.cpp")
 add_library(fft ${fft_SRC})
+
+# another, fast library for fft
+add_subdirectory(include/glfft)
 
 add_executable(max_resolution src/max_resolution.cpp)
 
@@ -39,6 +42,11 @@ add_executable(fft_smooth_growth src/game_of_life/fft_smooth_growth/main.cpp)
 target_link_libraries(fft_smooth_growth fft)
 add_executable(fft_smooth_growth_benchmark src/game_of_life/fft_smooth_growth/benchmark.cpp)
 target_link_libraries(fft_smooth_growth_benchmark fft)
+add_executable(glfft_smooth_growth src/game_of_life/glfft_smooth_growth/main.cpp)
+target_link_libraries(glfft_smooth_growth fft glfft)
+
+add_executable(fft_test src/fft/fft_test.cpp)
+target_link_libraries(fft_test fft glfft)
 
 
 # copy shader files to binary folder

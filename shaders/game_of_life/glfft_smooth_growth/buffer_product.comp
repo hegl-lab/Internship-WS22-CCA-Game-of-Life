@@ -1,0 +1,21 @@
+#version 430 core
+
+layout (local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
+layout (std430) buffer A {
+    float[] values_A;
+};
+layout (std430) buffer B {
+    float[] values_B;
+};
+
+void main() {
+    int position = 2 * int(gl_GlobalInvocationID.x);
+
+    float a_real = values_A[position];
+    float b_real = values_B[position];
+    float a_complex = values_A[position + 1];
+    float b_complex = values_B[position + 1];
+
+    values_A[position] = a_real * b_real - a_complex * b_complex;
+    values_A[position + 1] = a_real * b_complex + a_complex * b_real;
+}

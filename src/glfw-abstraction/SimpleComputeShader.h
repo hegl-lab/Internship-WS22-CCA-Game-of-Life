@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Texture.h"
+#include "Buffer.h"
 
 #include <fstream>
 #include <iostream>
@@ -122,6 +123,12 @@ public:
      * @param count number of values in the array
      */
     void bind_uniform(GLint location, float *value, int count) const;
+
+    GLint find_block_index(const std::string &name) const;
+
+    void bind_buffer(GLint location, const Buffer &buffer, int point) const;
+
+    void bind_buffer(const std::string &name, const Buffer &buffer, int point) const;
 private:
     const char *path;
 };

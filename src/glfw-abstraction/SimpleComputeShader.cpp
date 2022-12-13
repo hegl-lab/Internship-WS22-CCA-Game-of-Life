@@ -123,3 +123,16 @@ void SimpleComputeShader::bind_uniform(GLint location, float value) const {
 void SimpleComputeShader::bind_uniform(GLint location, float *value, int count) const {
     glUniform1fv(location, count, value);
 }
+
+GLint SimpleComputeShader::find_block_index(const std::string &name) const {
+    return glGetProgramResourceIndex(id, GL_SHADER_STORAGE_BLOCK, name.c_str());
+}
+
+void SimpleComputeShader::bind_buffer(GLint location, const Buffer &buffer, int point) const {
+    glShaderStorageBlockBinding(id, location, point);
+    buffer.bind(point);
+}
+
+void SimpleComputeShader::bind_buffer(const std::string &name, const Buffer &buffer, int point) const {
+    bind_buffer(find_block_index(name), buffer, point);
+}
