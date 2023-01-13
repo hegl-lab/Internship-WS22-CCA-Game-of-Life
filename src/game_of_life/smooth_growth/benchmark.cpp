@@ -28,8 +28,8 @@ bool render_loop_call(GLFWwindow *window);
 void call_after_glfw_init(GLFWwindow *window);
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        std::cerr << "Expected format: " << argv[0] << " width height runs" << std::endl;
+    if (argc != 5) {
+        std::cerr << "Expected format: " << argv[0] << " width height runs R|dynamic" << std::endl;
         return 1;
     }
     width = std::stoi(argv[1]);
@@ -37,8 +37,11 @@ int main(int argc, char *argv[]) {
     runs = std::stoi(argv[3]);
     delay = 0;
     frequency = 10;
-    R = width / 2 - 1;
-    orbium = false;
+
+    if (std::strcmp(argv[4], "dynamic") == 0) R = width / 2 - 1;
+    else R = std::stoi(argv[4]);
+
+    orbium = true;
 
     init<render_loop_call, call_after_glfw_init>(10, 10);
     return 0;
@@ -49,7 +52,7 @@ long measurement = 0;
 
 bool render_loop_call(GLFWwindow *window) {
     if (run == runs) {
-        std::cout << measurement << std::endl;
+        std::cout << width << '\t' << measurement << std::endl;
         return false;
     }
     ++run;
@@ -62,6 +65,7 @@ bool render_loop_call(GLFWwindow *window) {
 
     passthrough_shader.use();
     passthrough_shader.render_to_texture(out_texture, in_texture);
+    glFinish();
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
     measurement += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
