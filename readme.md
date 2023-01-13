@@ -11,8 +11,6 @@ You can find more information about the Continuous Game of Life and especially L
 - Continuous Space (Fragment Shader)
 - Smooth Kernel (Fragment Shader)
 - Smooth Growth / Lenia (Fragment Shader)
-
-# Upcoming / Planned
 - Using Fast Fourier Transformation to improve performance when calculating the next states.
 
 ## How to build
